@@ -12,12 +12,6 @@ const quizSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    questions: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Question",
-      },
-    ],
     isActive: {
       type: Boolean,
       default: true,

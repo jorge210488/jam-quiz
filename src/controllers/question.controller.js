@@ -1,11 +1,11 @@
-const Question = require("../models/Question");
+const questionService = require("../services/question.service");
 
 // Crear una pregunta individual
 exports.createQuestion = async (req, res) => {
   try {
     const { quiz, questionText, options, correctAnswer, timeLimit } = req.body;
 
-    const newQuestion = new Question({
+    const newQuestion = await questionService.createQuestion({
       quiz,
       questionText,
       options,
@@ -13,7 +13,6 @@ exports.createQuestion = async (req, res) => {
       timeLimit,
     });
 
-    await newQuestion.save();
     res
       .status(201)
       .json({ message: "Question created", question: newQuestion });
@@ -27,7 +26,7 @@ exports.createQuestion = async (req, res) => {
 exports.getQuestionsByQuiz = async (req, res) => {
   try {
     const quizId = req.params.quizId;
-    const questions = await Question.find({ quiz: quizId });
+    const questions = await questionService.getQuestionsByQuiz(quizId);
 
     res.status(200).json(questions);
   } catch (error) {

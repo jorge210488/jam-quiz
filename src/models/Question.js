@@ -5,7 +5,7 @@ const questionSchema = new mongoose.Schema(
     quiz: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Quiz",
-      required: true,
+      required: true, // ✅ cada Question pertenece SIEMPRE a un Quiz
     },
     questionText: {
       type: String,

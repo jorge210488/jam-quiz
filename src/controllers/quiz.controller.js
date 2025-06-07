@@ -5,17 +5,16 @@ const Question = require("../models/Question");
 exports.createQuiz = async (req, res) => {
   try {
     const { title, description, questions } = req.body;
-    const createdBy = req.user.id; // Suponiendo que el user viene del middleware auth
+    const createdBy = req.user.id; // Viene del middleware auth
 
     const newQuiz = new Quiz({ title, description, createdBy });
     await newQuiz.save();
 
+    // Si se envían preguntas al crear el quiz
     if (questions && questions.length > 0) {
-      const questionDocs = await Question.insertMany(
+      await Question.insertMany(
         questions.map((q) => ({ ...q, quiz: newQuiz._id }))
       );
-      newQuiz.questions = questionDocs.map((q) => q._id);
-      await newQuiz.save();
     }
 
     res.status(201).json({ message: "Quiz created", quiz: newQuiz });
@@ -28,9 +27,7 @@ exports.createQuiz = async (req, res) => {
 // Obtener todos los quizzes
 exports.getAllQuizzes = async (req, res) => {
   try {
-    const quizzes = await Quiz.find()
-      .populate("createdBy", "username")
-      .populate("questions");
+    const quizzes = await Quiz.find().populate("createdBy", "username");
 
     res.status(200).json(quizzes);
   } catch (error) {
@@ -39,18 +36,25 @@ exports.getAllQuizzes = async (req, res) => {
   }
 };
 
-// Obtener un quiz por ID
+// Obtener un quiz por ID con sus preguntas reales
 exports.getQuizById = async (req, res) => {
   try {
-    const quiz = await Quiz.findById(req.params.id)
-      .populate("createdBy", "username")
-      .populate("questions");
+    const quiz = await Quiz.findById(req.params.id).populate(
+      "createdBy",
+      "username"
+    );
 
     if (!quiz) {
       return res.status(404).json({ message: "Quiz not found" });
     }
 
-    res.status(200).json(quiz);
+    // Traer las questions reales de la colección Question
+    const questions = await Question.find({ quiz: quiz._id });
+
+    res.status(200).json({
+      quiz,
+      questions,
+    });
   } catch (error) {
     console.error("Error getting quiz:", error);
     res.status(500).json({ message: "Error getting quiz" });
