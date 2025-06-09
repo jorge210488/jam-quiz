@@ -16,7 +16,10 @@ const io = socketIO(server, {
 const connectDB = require("./config/db");
 const quizRoutes = require("./routes/quiz.routes");
 const authRoutes = require("./routes/auth.routes");
-const questionRoutes = require("./routes/question.routes"); // 👈 NUEVA RUTA
+const userRoutes = require("./routes/user.routes");
+const questionRoutes = require("./routes/question.routes");
+const gameSessionRoutes = require("./routes/gameSession.routes");
+
 const socketHandler = require("./sockets/socket.handler");
 
 app.use(cors());
@@ -25,7 +28,9 @@ app.use(express.json());
 // Rutas
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/questions", questionRoutes); // 👈 NUEVA RUTA
+app.use("/api/questions", questionRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/game-sessions", gameSessionRoutes);
 
 // Socket.io
 io.on("connection", (socket) => {
