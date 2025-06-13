@@ -17,7 +17,8 @@ exports.createGameSession = async (req, res) => {
 
 exports.addResponse = async (req, res) => {
   try {
-    const { user, question, answer, timeTaken } = req.body;
+    const { user, question, answer, timeTaken, powerUpUsed } = req.body;
+
     const sessionId = req.params.id;
 
     const session = await gameSessionService.addResponse(sessionId, {
@@ -25,6 +26,7 @@ exports.addResponse = async (req, res) => {
       question,
       answer,
       timeTaken,
+      powerUpUsed,
     });
 
     res.status(200).json({ message: "Response added", session });

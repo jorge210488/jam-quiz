@@ -14,12 +14,12 @@ exports.createGameSession = async ({ quiz, players }) => {
 
 exports.addResponse = async (
   sessionId,
-  { user, question, answer, timeTaken }
+  { user, question, answer, timeTaken, powerUpUsed }
 ) => {
   const session = await GameSession.findById(sessionId);
   if (!session) throw new Error("GameSession not found");
 
-  session.responses.push({ user, question, answer, timeTaken });
+  session.responses.push({ user, question, answer, timeTaken, powerUpUsed });
   await session.save();
 
   return session;

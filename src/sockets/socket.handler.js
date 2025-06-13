@@ -1,6 +1,7 @@
 const GameSession = require("../models/GameSession");
 const Quiz = require("../models/Quiz");
-const Question = require("../models/Question"); // Agregamos esto para poder hacer el find
+const Question = require("../models/Question");
+const User = require("../models/User");
 
 module.exports = (io, socket) => {
   socket.on("joinRoom", ({ roomId, user }) => {
@@ -10,33 +11,82 @@ module.exports = (io, socket) => {
 
   socket.on(
     "answer",
-    async ({ sessionId, roomId, user, question, answer, timeTaken }) => {
+    async ({
+      sessionId,
+      roomId,
+      user,
+      question,
+      answer,
+      timeTaken,
+      powerUpUsed,
+    }) => {
       try {
         const session = await GameSession.findById(sessionId);
-        if (session) {
-          session.responses.push({ user, question, answer, timeTaken });
-          await session.save();
+        if (!session) return;
 
-          io.to(roomId).emit("receiveAnswer", {
-            user,
-            question,
-            answer,
-            timeTaken,
-          });
+        // Guardar respuesta
+        session.responses.push({
+          user,
+          question,
+          answer,
+          timeTaken,
+          powerUpUsed,
+        });
+
+        // Calcular puntos (puedes definir tu lógica de puntaje)
+        let basePoints = 10; // ejemplo: cada respuesta correcta vale 10
+        let pointsEarned = 0;
+
+        // Simulación: le damos puntos siempre, luego puedes cruzar con la respuesta correcta
+        if (powerUpUsed === "double_points") {
+          pointsEarned = basePoints * 2;
+        } else if (powerUpUsed === "skip") {
+          pointsEarned = 0;
+        } else {
+          pointsEarned = basePoints;
         }
+
+        // Actualizar equipo
+        const team = session.teams.find((t) =>
+          t.members.some((memberId) => memberId.equals(user))
+        );
+
+        if (team) {
+          team.score += pointsEarned;
+        }
+
+        // Actualizar score individual del usuario (opcional)
+        const player = await User.findById(user);
+        if (player) {
+          player.score = (player.score || 0) + pointsEarned;
+          await player.save();
+        }
+
+        // Guardamos la sesión
+        await session.save();
+
+        // Emitir respuesta + score actualizado
+        io.to(roomId).emit("receiveAnswer", {
+          user,
+          question,
+          answer,
+          timeTaken,
+          powerUpUsed,
+          pointsEarned,
+          teamScore: team ? team.score : null,
+          playerScore: player ? player.score : null,
+        });
       } catch (err) {
         console.error("Error saving answer:", err);
       }
     }
   );
 
-  // 🚀 NUEVO → Control server-side con cola de preguntas (Opción 1)
   socket.on("startGame", async ({ sessionId, roomId, durationPerQuestion }) => {
     try {
       const session = await GameSession.findById(sessionId).populate("quiz");
       if (!session) return;
 
-      // Obtenemos las preguntas del quiz → SIN CAMBIAR EL MODELO QUIZ
       const questions = await Question.find({ quiz: session.quiz._id }).sort({
         createdAt: 1,
       });
@@ -55,7 +105,6 @@ module.exports = (io, socket) => {
 
       const sendNextQuestion = async () => {
         if (currentQuestionIndex >= questionIds.length) {
-          // Partida terminada
           session.endTime = new Date();
           session.status = "finished";
           await session.save();
@@ -70,7 +119,6 @@ module.exports = (io, socket) => {
         const now = new Date();
         const endTime = new Date(now.getTime() + durationPerQuestion * 1000);
 
-        // Actualizamos startTime y endTime de la sesión (opcional)
         session.startTime = now;
         session.endTime = endTime;
         await session.save();
@@ -80,20 +128,17 @@ module.exports = (io, socket) => {
           endTime,
         });
 
-        // Programamos el siguiente paso
         setTimeout(() => {
           io.to(roomId).emit("questionTimeout", {
             questionId,
             message: "⏰ Tiempo terminado para esta pregunta.",
           });
 
-          // Pasamos a la siguiente pregunta
           currentQuestionIndex++;
           sendNextQuestion();
         }, durationPerQuestion * 1000);
       };
 
-      // Iniciamos la primera pregunta
       sendNextQuestion();
     } catch (err) {
       console.error("Error en startGame:", err);

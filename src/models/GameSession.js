@@ -19,6 +19,25 @@ const responseSchema = new mongoose.Schema({
     type: Number, // en segundos
     required: true,
   },
+  powerUpUsed: {
+    type: String,
+    enum: ["double_points", "skip", "none"],
+    default: "none",
+  },
+});
+
+const teamSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  members: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  score: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const gameSessionSchema = new mongoose.Schema(
@@ -34,6 +53,7 @@ const gameSessionSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    teams: [teamSchema], // 🚀 nuevo campo
     startTime: Date,
     endTime: Date,
     responses: [responseSchema],
