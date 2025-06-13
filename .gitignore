@@ -19,6 +19,3 @@ Thumbs.db
 # Others
 dist/
 coverage/
-
-
-/src/test/

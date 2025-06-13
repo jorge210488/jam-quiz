@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>🎮 Live Quiz Test Client</title>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <style>
+      body {
+        font-family: Arial;
+        padding: 20px;
+      }
+      .log {
+        background: #f0f0f0;
+        padding: 10px;
+        margin-top: 10px;
+        white-space: pre-line;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🎮 Live Quiz Test Client</h1>
+
+    <div>
+      <label>Room ID:</label>
+      <input type="text" id="roomId" value="room1" /><br />
+      <label>Session ID:</label>
+      <input type="text" id="sessionId" /><br />
+      <label>User ID:</label>
+      <input type="text" id="userId" /><br />
+      <label>Duration per Question (sec):</label>
+      <input type="number" id="durationPerQuestion" value="10" /><br /><br />
+
+      <button onclick="joinRoom()">Join Room</button>
+      <button onclick="startGame()">Start Game</button>
+      <button onclick="sendAnswer()">Send Answer</button>
+    </div>
+
+    <h3>📜 Logs:</h3>
+    <div class="log" id="logs"></div>
+
+    <script>
+      const socket = io("http://localhost:4000");
+
+      function log(message) {
+        const logs = document.getElementById("logs");
+        logs.innerText += message + "\n";
+      }
+
+      socket.on("connect", () => {
+        log(`✅ Connected: ${socket.id}`);
+      });
+
+      socket.on("disconnect", () => {
+        log(`🔴 Disconnected`);
+      });
+
+      // 🔹 NUEVO → escuchar userJoined
+      socket.on("userJoined", (user) => {
+        log(`⬅️ userJoined ${user}`);
+      });
+
+      socket.on("startQuestion", (data) => {
+        log(
+          `⬅️ startQuestion: questionId=${data.questionId}, endTime=${data.endTime}`
+        );
+      });
+
+      socket.on("questionTimeout", (data) => {
+        log(`⬅️ questionTimeout: questionId=${data.questionId}`);
+      });
+
+      socket.on("receiveAnswer", (data) => {
+        log(
+          `⬅️ receiveAnswer from user=${data.user}, answer=${data.answer}, powerUp=${data.powerUpUsed}`
+        );
+      });
+
+      socket.on("gameFinished", (data) => {
+        log(`🏁 gameFinished: ${data.message}`);
+      });
+
+      function joinRoom() {
+        const roomId = document.getElementById("roomId").value;
+        const userId = document.getElementById("userId").value;
+
+        socket.emit("joinRoom", { roomId, user: userId });
+        log(`➡️ Emitted joinRoom: room=${roomId}, user=${userId}`);
+      }
+
+      function startGame() {
+        const roomId = document.getElementById("roomId").value;
+        const sessionId = document.getElementById("sessionId").value;
+        const durationPerQuestion = parseInt(
+          document.getElementById("durationPerQuestion").value
+        );
+
+        socket.emit("startGame", { sessionId, roomId, durationPerQuestion });
+        log(
+          `➡️ Emitted startGame: sessionId=${sessionId}, room=${roomId}, duration=${durationPerQuestion}s`
+        );
+      }
+
+      function sendAnswer() {
+        const roomId = document.getElementById("roomId").value;
+        const sessionId = document.getElementById("sessionId").value;
+        const userId = document.getElementById("userId").value;
+
+        // Para prueba, escribe el questionId que ves en startQuestion
+        const questionId = prompt("Enter Question ID to answer:");
+        const answer = prompt("Enter your answer:");
+        const powerUpUsed = prompt(
+          "Enter powerUpUsed (double_points, skip, none):",
+          "none"
+        );
+
+        socket.emit("answer", {
+          sessionId,
+          roomId,
+          user: userId,
+          question: questionId,
+          answer,
+          timeTaken: Math.floor(Math.random() * 10) + 1,
+          powerUpUsed,
+        });
+
+        log(
+          `➡️ Emitted answer: question=${questionId}, answer=${answer}, powerUp=${powerUpUsed}`
+        );
+      }
+    </script>
+  </body>
+</html>
