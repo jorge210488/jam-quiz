@@ -47,3 +47,30 @@ exports.getGameSessionById = async (req, res) => {
     res.status(500).json({ message: "Error getting GameSession" });
   }
 };
+
+exports.getSessionsByUser = async (req, res) => {
+  try {
+    const { userId } = req.query;
+    if (!userId) {
+      return res.status(400).json({ message: "userId is required" });
+    }
+
+    const sessions = await gameSessionService.getGameSessionsByUser(userId);
+    res.status(200).json(sessions);
+  } catch (error) {
+    console.error("Error fetching user sessions:", error);
+    res.status(500).json({ message: "Error fetching user sessions" });
+  }
+};
+
+exports.finishGameSession = async (req, res) => {
+  try {
+    const sessionId = req.params.id;
+    const session = await gameSessionService.finishGameSession(sessionId);
+
+    res.status(200).json({ message: "GameSession finished", session });
+  } catch (error) {
+    console.error("Error finishing session:", error);
+    res.status(500).json({ message: "Error finishing session" });
+  }
+};

@@ -1,5 +1,6 @@
 const Quiz = require("../models/Quiz");
 const Question = require("../models/Question");
+const quizService = require("../services/quizService");
 
 // Crear un nuevo quiz
 exports.createQuiz = async (req, res) => {
@@ -58,5 +59,16 @@ exports.getQuizById = async (req, res) => {
   } catch (error) {
     console.error("Error getting quiz:", error);
     res.status(500).json({ message: "Error getting quiz" });
+  }
+};
+
+// Obtener todos los quizzes activos
+exports.getActiveQuizzes = async (req, res) => {
+  try {
+    const quizzes = await quizService.getActiveQuizzes();
+    res.status(200).json(quizzes);
+  } catch (error) {
+    console.error("Error getting active quizzes:", error);
+    res.status(500).json({ message: "Error getting active quizzes" });
   }
 };

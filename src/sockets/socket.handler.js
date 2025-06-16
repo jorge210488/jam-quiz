@@ -34,10 +34,9 @@ module.exports = (io, socket) => {
         });
 
         // Calcular puntos (puedes definir tu lógica de puntaje)
-        let basePoints = 10; // ejemplo: cada respuesta correcta vale 10
+        let basePoints = 10;
         let pointsEarned = 0;
 
-        // Simulación: le damos puntos siempre, luego puedes cruzar con la respuesta correcta
         if (powerUpUsed === "double_points") {
           pointsEarned = basePoints * 2;
         } else if (powerUpUsed === "skip") {
@@ -62,10 +61,8 @@ module.exports = (io, socket) => {
           await player.save();
         }
 
-        // Guardamos la sesión
         await session.save();
 
-        // Emitir respuesta + score actualizado
         io.to(roomId).emit("receiveAnswer", {
           user,
           question,
@@ -97,6 +94,7 @@ module.exports = (io, socket) => {
         return;
       }
 
+      // Guardar solo una vez el tiempo de inicio
       session.startTime = new Date();
       session.status = "started";
       await session.save();
@@ -116,12 +114,7 @@ module.exports = (io, socket) => {
         }
 
         const questionId = questionIds[currentQuestionIndex];
-        const now = new Date();
-        const endTime = new Date(now.getTime() + durationPerQuestion * 1000);
-
-        session.startTime = now;
-        session.endTime = endTime;
-        await session.save();
+        const endTime = new Date(Date.now() + durationPerQuestion * 1000);
 
         io.to(roomId).emit("startQuestion", {
           questionId,

@@ -53,7 +53,7 @@ const gameSessionSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
-    teams: [teamSchema], // 🚀 nuevo campo
+    teams: [teamSchema],
     startTime: Date,
     endTime: Date,
     responses: [responseSchema],

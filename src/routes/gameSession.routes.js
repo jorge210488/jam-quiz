@@ -11,7 +11,13 @@ router.post("/", protect, gameSessionController.createGameSession);
 // Agregar respuesta → token obligatorio
 router.post("/:id/responses", protect, gameSessionController.addResponse);
 
-// Ver una GameSession → token obligatorio
+// Ver una GameSession específica por ID → token obligatorio
 router.get("/:id", protect, gameSessionController.getGameSessionById);
+
+// 🆕 Ver historial de GameSessions por usuario → token obligatorio
+router.get("/", protect, gameSessionController.getSessionsByUser);
+
+// terminar la gameSession
+router.put("/:id/finish", protect, gameSessionController.finishGameSession);
 
 module.exports = router;

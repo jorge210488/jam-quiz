@@ -31,3 +31,11 @@ exports.getQuizById = async (quizId) => {
 
   return { quiz, questions };
 };
+
+exports.getActiveQuizzes = async () => {
+  const quizzes = await Quiz.find({ isActive: true }).populate(
+    "createdBy",
+    "username"
+  );
+  return quizzes;
+};

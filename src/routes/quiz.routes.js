@@ -4,11 +4,15 @@ const {
   createQuiz,
   getAllQuizzes,
   getQuizById,
+  getActiveQuizzes,
 } = require("../controllers/quiz.controller");
 const { protect } = require("../middlewares/auth.middleware");
 
 // Obtener todos los quizzes (pública)
 router.get("/", getAllQuizzes);
+
+// 🟢 Obtener quizzes activos (pública o protegida según quieras)
+router.get("/active", getActiveQuizzes);
 
 // Obtener un quiz por ID (pública)
 router.get("/:id", getQuizById);
