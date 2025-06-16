@@ -40,6 +40,7 @@
 
     <script>
       const socket = io("http://localhost:4000");
+      let currentQuestionId = null;
 
       function log(message) {
         const logs = document.getElementById("logs");
@@ -54,29 +55,38 @@
         log(`🔴 Disconnected`);
       });
 
-      // 🔹 NUEVO → escuchar userJoined
       socket.on("userJoined", (user) => {
         log(`⬅️ userJoined ${user}`);
       });
 
+      // Recibir nueva pregunta real
       socket.on("startQuestion", (data) => {
-        log(
-          `⬅️ startQuestion: questionId=${data.questionId}, endTime=${data.endTime}`
-        );
+        currentQuestionId = data.questionId;
+
+        log(`⬅️ startQuestion:
+🆔 ID: ${data.questionId}
+🧠 Pregunta: ${data.questionText}
+📊 Opciones:
+${data.options.map((opt, i) => `   ${i + 1}. ${opt}`).join("\n")}
+⏰ Finaliza en: ${data.endTime}`);
       });
 
       socket.on("questionTimeout", (data) => {
-        log(`⬅️ questionTimeout: questionId=${data.questionId}`);
+        log(`⏰ Tiempo terminado para pregunta: ${data.questionId}`);
       });
 
       socket.on("receiveAnswer", (data) => {
-        log(
-          `⬅️ receiveAnswer from user=${data.user}, answer=${data.answer}, powerUp=${data.powerUpUsed}`
-        );
+        log(`⬅️ Respuesta recibida:
+🙋 Usuario: ${data.user}
+✏️ Respuesta: ${data.answer}
+⚡ PowerUp: ${data.powerUpUsed}
+🏆 Puntos: ${data.pointsEarned}
+👥 Puntos del equipo: ${data.teamScore}
+🧍 Puntos individuales: ${data.playerScore}`);
       });
 
       socket.on("gameFinished", (data) => {
-        log(`🏁 gameFinished: ${data.message}`);
+        log(`🏁 Fin del juego: ${data.message}`);
       });
 
       function joinRoom() {
@@ -84,7 +94,7 @@
         const userId = document.getElementById("userId").value;
 
         socket.emit("joinRoom", { roomId, user: userId });
-        log(`➡️ Emitted joinRoom: room=${roomId}, user=${userId}`);
+        log(`➡️ Emitido: joinRoom (room=${roomId}, user=${userId})`);
       }
 
       function startGame() {
@@ -96,7 +106,7 @@
 
         socket.emit("startGame", { sessionId, roomId, durationPerQuestion });
         log(
-          `➡️ Emitted startGame: sessionId=${sessionId}, room=${roomId}, duration=${durationPerQuestion}s`
+          `➡️ Emitido: startGame (sessionId=${sessionId}, room=${roomId}, duración=${durationPerQuestion}s)`
         );
       }
 
@@ -105,11 +115,14 @@
         const sessionId = document.getElementById("sessionId").value;
         const userId = document.getElementById("userId").value;
 
-        // Para prueba, escribe el questionId que ves en startQuestion
-        const questionId = prompt("Enter Question ID to answer:");
-        const answer = prompt("Enter your answer:");
+        if (!currentQuestionId) {
+          log("❌ No hay pregunta actual.");
+          return;
+        }
+
+        const answer = prompt("Ingrese su respuesta:");
         const powerUpUsed = prompt(
-          "Enter powerUpUsed (double_points, skip, none):",
+          "¿Usó un power-up? (double_points, skip, none)",
           "none"
         );
 
@@ -117,14 +130,14 @@
           sessionId,
           roomId,
           user: userId,
-          question: questionId,
+          question: currentQuestionId,
           answer,
           timeTaken: Math.floor(Math.random() * 10) + 1,
           powerUpUsed,
         });
 
         log(
-          `➡️ Emitted answer: question=${questionId}, answer=${answer}, powerUp=${powerUpUsed}`
+          `➡️ Emitido: answer (pregunta=${currentQuestionId}, respuesta=${answer}, powerUp=${powerUpUsed})`
         );
       }
     </script>
