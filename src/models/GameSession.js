@@ -42,21 +42,18 @@ const teamSchema = new mongoose.Schema({
 
 const gameSessionSchema = new mongoose.Schema(
   {
-    quiz: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Quiz",
-      required: true,
-    },
-    players: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    quiz: { type: mongoose.Schema.Types.ObjectId, ref: "Quiz", required: true },
+    players: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     teams: [teamSchema],
     startTime: Date,
     endTime: Date,
     responses: [responseSchema],
+    individualScores: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        score: { type: Number, default: 0 },
+      },
+    ],
     status: {
       type: String,
       enum: ["waiting", "started", "finished"],

@@ -6,9 +6,23 @@ exports.createQuiz = async ({ title, description, questions, createdBy }) => {
   await newQuiz.save();
 
   if (questions && questions.length > 0) {
-    await Question.insertMany(
-      questions.map((q) => ({ ...q, quiz: newQuiz._id }))
-    );
+    // Obtener textos únicos por pregunta (para no duplicar contenido)
+    const questionTexts = new Set();
+
+    const filteredQuestions = questions.filter((q) => {
+      if (questionTexts.has(q.questionText)) {
+        return false; // ya está
+      }
+      questionTexts.add(q.questionText);
+      return true;
+    });
+
+    const questionsToInsert = filteredQuestions.map((q) => ({
+      ...q,
+      quiz: newQuiz._id,
+    }));
+
+    await Question.insertMany(questionsToInsert);
   }
 
   return newQuiz;

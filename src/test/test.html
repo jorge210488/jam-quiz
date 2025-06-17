@@ -41,6 +41,7 @@
     <script>
       const socket = io("http://localhost:4000");
       let currentQuestionId = null;
+      let lastPlayerScore = 0;
 
       function log(message) {
         const logs = document.getElementById("logs");
@@ -76,17 +77,21 @@ ${data.options.map((opt, i) => `   ${i + 1}. ${opt}`).join("\n")}
       });
 
       socket.on("receiveAnswer", (data) => {
+        lastPlayerScore = data.playerScore ?? 0;
         log(`⬅️ Respuesta recibida:
 🙋 Usuario: ${data.user}
 ✏️ Respuesta: ${data.answer}
+✅ ¿Correcta?: ${data.isCorrect ? "Sí 🎯" : "No ❌"}
 ⚡ PowerUp: ${data.powerUpUsed}
-🏆 Puntos: ${data.pointsEarned}
-👥 Puntos del equipo: ${data.teamScore}
-🧍 Puntos individuales: ${data.playerScore}`);
+🏆 Puntos ganados: ${data.pointsEarned}
+👥 Puntos del equipo: ${data.teamScore ?? "N/A"}
+🧍 Puntaje TOTAL acumulado del jugador: ${data.playerScore ?? "N/A"}
+`);
       });
 
       socket.on("gameFinished", (data) => {
-        log(`🏁 Fin del juego: ${data.message}`);
+        log(`🏁 Fin del juego: ${data.message}
+👉 Puntaje final del jugador: ${lastPlayerScore}`);
       });
 
       function joinRoom() {

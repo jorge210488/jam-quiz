@@ -6,6 +6,10 @@ exports.createGameSession = async ({ quiz, players }) => {
     players,
     startTime: new Date(),
     status: "started",
+    individualScores: players.map((playerId) => ({
+      user: playerId,
+      score: 0,
+    })),
   });
 
   await newSession.save();

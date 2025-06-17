@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const GameSession = require("../models/GameSession");
 const Quiz = require("../models/Quiz");
 const Question = require("../models/Question");
-const User = require("../models/User");
 
 module.exports = (io, socket) => {
   socket.on("joinRoom", ({ roomId, user }) => {
@@ -88,6 +87,22 @@ module.exports = (io, socket) => {
         const session = await GameSession.findById(sessionId);
         if (!session) return;
 
+        const questionDoc = await Question.findById(question);
+        if (!questionDoc) return;
+
+        const isCorrect = answer === questionDoc.correctAnswer;
+
+        let basePoints = 10;
+        let pointsEarned = 0;
+
+        if (powerUpUsed === "double_points") {
+          pointsEarned = isCorrect ? basePoints * 2 : 0;
+        } else if (powerUpUsed === "skip") {
+          pointsEarned = 0;
+        } else {
+          pointsEarned = isCorrect ? basePoints : 0;
+        }
+
         session.responses.push({
           user,
           question: new mongoose.Types.ObjectId(question),
@@ -96,19 +111,7 @@ module.exports = (io, socket) => {
           powerUpUsed,
         });
 
-        // Lógica de puntaje
-        let basePoints = 10;
-        let pointsEarned = 0;
-
-        if (powerUpUsed === "double_points") {
-          pointsEarned = basePoints * 2;
-        } else if (powerUpUsed === "skip") {
-          pointsEarned = 0;
-        } else {
-          pointsEarned = basePoints;
-        }
-
-        // Actualizar equipo (si existen)
+        // Actualizar equipo (si existe)
         const team = session.teams.find((t) =>
           t.members.some((memberId) => memberId.equals(user))
         );
@@ -116,11 +119,15 @@ module.exports = (io, socket) => {
           team.score += pointsEarned;
         }
 
-        // Actualizar puntaje del jugador individual
-        const player = await User.findById(user);
-        if (player) {
-          player.score = (player.score || 0) + pointsEarned;
-          await player.save();
+        // Actualizar score individual
+        let playerEntry = session.individualScores.find((p) =>
+          p.user.equals(user)
+        );
+
+        if (playerEntry) {
+          playerEntry.score += pointsEarned;
+        } else {
+          session.individualScores.push({ user, score: pointsEarned });
         }
 
         await session.save();
@@ -131,9 +138,10 @@ module.exports = (io, socket) => {
           answer,
           timeTaken,
           powerUpUsed,
+          isCorrect,
           pointsEarned,
           teamScore: team ? team.score : null,
-          playerScore: player ? player.score : null,
+          playerScore: playerEntry ? playerEntry.score : pointsEarned, // si es su primera vez, usa lo ganado ahora
         });
       } catch (err) {
         console.error("❌ Error saving answer:", err);
