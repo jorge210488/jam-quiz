@@ -20,6 +20,7 @@ const userRoutes = require("./routes/user.routes");
 const questionRoutes = require("./routes/question.routes");
 const gameSessionRoutes = require("./routes/gameSession.routes");
 const questionFeedbackRoutes = require("./routes/questionFeedback.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 const socketHandler = require("./sockets/socket.handler");
 
@@ -33,6 +34,7 @@ app.use("/api/questions", questionRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/game-sessions", gameSessionRoutes);
 app.use("/api/question-feedback", questionFeedbackRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Socket.io
 io.on("connection", (socket) => {
