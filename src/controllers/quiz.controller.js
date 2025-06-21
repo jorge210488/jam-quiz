@@ -5,13 +5,12 @@ const quizService = require("../services/quizService");
 // Crear un nuevo quiz
 exports.createQuiz = async (req, res) => {
   try {
-    const { title, description, questions } = req.body;
-    const createdBy = req.user.id; // Viene del middleware auth
+    const { title, description, questions, isOpen, isLive } = req.body;
+    const createdBy = req.user.id;
 
-    const newQuiz = new Quiz({ title, description, createdBy });
+    const newQuiz = new Quiz({ title, description, createdBy, isOpen, isLive });
     await newQuiz.save();
 
-    // Si se envían preguntas al crear el quiz
     if (questions && questions.length > 0) {
       await Question.insertMany(
         questions.map((q) => ({ ...q, quiz: newQuiz._id }))
@@ -28,8 +27,12 @@ exports.createQuiz = async (req, res) => {
 // Obtener todos los quizzes
 exports.getAllQuizzes = async (req, res) => {
   try {
-    const quizzes = await Quiz.find().populate("createdBy", "username");
+    const { isOpen } = req.query;
+    const filter = {};
 
+    if (isOpen === "true") filter.isOpen = true;
+
+    const quizzes = await Quiz.find(filter).populate("createdBy", "username");
     res.status(200).json(quizzes);
   } catch (error) {
     console.error("Error getting quizzes:", error);

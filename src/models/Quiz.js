@@ -16,6 +16,14 @@ const quizSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isLive: {
+      type: Boolean,
+      default: false,
+    },
+    isOpen: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

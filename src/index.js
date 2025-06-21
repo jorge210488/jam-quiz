@@ -22,6 +22,7 @@ const gameSessionRoutes = require("./routes/gameSession.routes");
 const questionFeedbackRoutes = require("./routes/questionFeedback.routes");
 const adminRoutes = require("./routes/admin.routes");
 const socketHandler = require("./sockets/socket.handler");
+const badgeRoutes = require("./routes/badge.routes");
 const preloadBadges = require("./config/preloadBadges");
 
 app.use(cors());
@@ -35,6 +36,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/game-sessions", gameSessionRoutes);
 app.use("/api/question-feedback", questionFeedbackRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/badges", badgeRoutes);
 
 // Socket.io
 io.on("connection", (socket) => {
