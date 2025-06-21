@@ -21,8 +21,8 @@ const questionRoutes = require("./routes/question.routes");
 const gameSessionRoutes = require("./routes/gameSession.routes");
 const questionFeedbackRoutes = require("./routes/questionFeedback.routes");
 const adminRoutes = require("./routes/admin.routes");
-
 const socketHandler = require("./sockets/socket.handler");
+const preloadBadges = require("./config/preloadBadges");
 
 app.use(cors());
 app.use(express.json());
@@ -42,7 +42,10 @@ io.on("connection", (socket) => {
   socketHandler(io, socket);
 });
 
-connectDB();
+connectDB().then(() => {
+  console.log("🟢 MongoDB conectado");
+  preloadBadges(); // 👉 aquí se ejecuta
+});
 
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () =>
