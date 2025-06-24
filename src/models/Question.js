@@ -5,7 +5,7 @@ const questionSchema = new mongoose.Schema(
     quiz: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Quiz",
-      required: true, // ✅ cada Question pertenece SIEMPRE a un Quiz
+      required: true,
     },
     questionText: {
       type: String,
@@ -20,8 +20,19 @@ const questionSchema = new mongoose.Schema(
       required: true,
     },
     timeLimit: {
-      type: Number, // in seconds
+      type: Number,
       default: 30,
+    },
+
+    // 🟡 NUEVO CAMPO: Traducciones
+    translations: {
+      type: Map,
+      of: new mongoose.Schema({
+        questionText: String,
+        options: [String],
+        correctAnswer: String,
+      }),
+      default: {},
     },
   },
   { timestamps: true }

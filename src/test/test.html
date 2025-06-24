@@ -31,6 +31,8 @@
       <input type="number" id="durationPerQuestion" value="10" /><br /><br />
 
       <button onclick="joinRoom()">Join Room</button>
+      <label>Idioma (lang):</label>
+      <input type="text" id="lang" value="es" /><br /><br />
       <button onclick="startGame()">Start Game</button>
       <button onclick="sendAnswer()">Send Answer</button>
     </div>
@@ -108,10 +110,16 @@ ${data.options.map((opt, i) => `   ${i + 1}. ${opt}`).join("\n")}
         const durationPerQuestion = parseInt(
           document.getElementById("durationPerQuestion").value
         );
+        const lang = document.getElementById("lang").value || "es";
 
-        socket.emit("startGame", { sessionId, roomId, durationPerQuestion });
+        socket.emit("startGame", {
+          sessionId,
+          roomId,
+          durationPerQuestion,
+          lang,
+        });
         log(
-          `➡️ Emitido: startGame (sessionId=${sessionId}, room=${roomId}, duración=${durationPerQuestion}s)`
+          `➡️ Emitido: startGame (sessionId=${sessionId}, room=${roomId}, duración=${durationPerQuestion}s, lang=${lang})`
         );
       }
 

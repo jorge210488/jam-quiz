@@ -9,63 +9,71 @@ module.exports = (io, socket) => {
     io.to(roomId).emit("userJoined", user);
   });
 
-  socket.on("startGame", async ({ sessionId, roomId, durationPerQuestion }) => {
-    try {
-      const session = await GameSession.findById(sessionId).populate("quiz");
-      if (!session) return;
+  socket.on(
+    "startGame",
+    async ({ sessionId, roomId, durationPerQuestion, lang = "es" }) => {
+      try {
+        const session = await GameSession.findById(sessionId).populate("quiz");
+        if (!session) return;
 
-      const questions = await Question.find({ quiz: session.quiz._id }).sort({
-        createdAt: 1,
-      });
-      if (questions.length === 0) {
-        console.error("❌ El quiz no tiene preguntas.");
-        return;
-      }
-
-      session.startTime = new Date();
-      session.status = "started";
-      await session.save();
-
-      let currentQuestionIndex = 0;
-
-      const sendNextQuestion = async () => {
-        if (currentQuestionIndex >= questions.length) {
-          session.endTime = new Date();
-          session.status = "finished";
-          await session.save();
-
-          io.to(roomId).emit("gameFinished", {
-            message: "🎉 El quiz ha terminado.",
-          });
+        const questions = await Question.find({ quiz: session.quiz._id }).sort({
+          createdAt: 1,
+        });
+        if (questions.length === 0) {
+          console.error("❌ El quiz no tiene preguntas.");
           return;
         }
 
-        const question = questions[currentQuestionIndex];
-        const endTime = new Date(Date.now() + durationPerQuestion * 1000);
+        session.startTime = new Date();
+        session.status = "started";
+        await session.save();
 
-        io.to(roomId).emit("startQuestion", {
-          questionId: question._id,
-          endTime,
-          questionText: question.questionText,
-          options: question.options,
-        });
+        let currentQuestionIndex = 0;
 
-        setTimeout(() => {
-          io.to(roomId).emit("questionTimeout", {
+        const sendNextQuestion = async () => {
+          if (currentQuestionIndex >= questions.length) {
+            session.endTime = new Date();
+            session.status = "finished";
+            await session.save();
+
+            io.to(roomId).emit("gameFinished", {
+              message: "🎉 El quiz ha terminado.",
+            });
+            return;
+          }
+
+          const question = questions[currentQuestionIndex];
+          const endTime = new Date(Date.now() + durationPerQuestion * 1000);
+
+          const translation = question.translations?.get(lang);
+          const questionText =
+            translation?.questionText || question.questionText;
+          const options = translation?.options || question.options;
+
+          io.to(roomId).emit("startQuestion", {
             questionId: question._id,
-            message: "⏰ Tiempo terminado para esta pregunta.",
+            endTime,
+            questionText,
+            options,
           });
 
-          currentQuestionIndex++;
-          sendNextQuestion();
-        }, durationPerQuestion * 1000);
-      };
+          setTimeout(() => {
+            io.to(roomId).emit("questionTimeout", {
+              questionId: question._id,
+              message: "⏰ Tiempo terminado para esta pregunta.",
+            });
 
-      sendNextQuestion();
-    } catch (err) {
-      console.error("❌ Error en startGame:", err);
+            currentQuestionIndex++;
+            sendNextQuestion();
+          }, durationPerQuestion * 1000);
+        };
+
+        sendNextQuestion();
+      } catch (err) {
+        console.error("❌ Error en startGame:", err);
+      }
     }
-  });
+  );
 
   socket.on(
     "answer",
