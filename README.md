@@ -50,7 +50,7 @@ Create a `.env` file in the root folder:
 
 ```env
 PORT=4000
-MONGO_URI=mongodb+srv://jorgemartinezjam:DxAcwmhnfnrhJpOJ@cluster.mongodb.net/quizdb
+MONGO_URI=mongodb+srv://<username>:<password>@<cluster-url>/<database-name>
 JWT_SECRET=your_jwt_secret
 ```
 
