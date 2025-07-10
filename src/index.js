@@ -4,6 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const socketIO = require("socket.io");
+const morgan = require("morgan");
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ const preloadBadges = require("./config/preloadBadges");
 
 app.use(cors());
 app.use(express.json());
+app.use(morgan("dev"));
 
 // Rutas
 app.use("/api/quizzes", quizRoutes);
