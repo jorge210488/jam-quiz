@@ -53,3 +53,46 @@ exports.getActiveQuizzes = async () => {
   );
   return quizzes;
 };
+
+exports.updateQuiz = async ({
+  quizId,
+  title,
+  description,
+  isOpen,
+  isLive,
+  isActive,
+  questions = [],
+}) => {
+  const quiz = await Quiz.findById(quizId);
+  if (!quiz) {
+    throw new Error("Quiz not found");
+  }
+
+  // Actualizar campos básicos si vienen definidos
+  if (title !== undefined) quiz.title = title;
+  if (description !== undefined) quiz.description = description;
+  if (isOpen !== undefined) quiz.isOpen = isOpen;
+  if (isLive !== undefined) quiz.isLive = isLive;
+  if (isActive !== undefined) quiz.isActive = isActive;
+
+  await quiz.save();
+
+  if (questions.length > 0) {
+    // Evitar preguntas duplicadas (por texto)
+    const existingQuestions = await Question.find({ quiz: quiz._id });
+    const existingTexts = new Set(existingQuestions.map((q) => q.questionText));
+
+    const newQuestions = questions.filter(
+      (q) => !existingTexts.has(q.questionText)
+    );
+
+    const questionsToInsert = newQuestions.map((q) => ({
+      ...q,
+      quiz: quiz._id,
+    }));
+
+    await Question.insertMany(questionsToInsert);
+  }
+
+  return quiz;
+};

@@ -1,4 +1,5 @@
 const userService = require("../services/user.service");
+const jwt = require("jsonwebtoken");
 
 exports.getAllUsers = async (req, res) => {
   try {
@@ -23,9 +24,18 @@ exports.getUserById = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const updatedUser = await userService.updateUser(req.params.id, req.body);
+
+    // 🔁 Regenerar token con nueva info
+    const token = jwt.sign(
+      { id: updatedUser.id, role: updatedUser.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
     res.status(200).json({
       message: "User updated",
       user: updatedUser,
+      token,
     });
   } catch (error) {
     console.error("Error updating user:", error);

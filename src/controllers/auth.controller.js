@@ -30,7 +30,12 @@ exports.login = async (req, res) => {
     if (!isMatch) throw new Error("Incorrect password");
     const token = createToken(user);
     res.status(200).json({
-      user: { name: user.name, email: user.email, role: user.role },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
       token,
     });
   } catch (err) {

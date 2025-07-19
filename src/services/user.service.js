@@ -21,20 +21,15 @@ exports.updateUser = async (userId, { name, email, role, password }) => {
   if (name) user.name = name;
   if (email) user.email = email;
   if (role) user.role = role;
-
-  if (password) {
-    user.password = password; // tu pre-save hook encripta
-  }
+  if (password) user.password = password; // pre-save hook lo encripta
 
   await user.save();
 
   return {
-    _id: user._id,
+    id: user._id.toString(), // 👈 importante para mantener consistencia con login
     name: user.name,
     email: user.email,
     role: user.role,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
   };
 };
 

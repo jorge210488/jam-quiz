@@ -75,3 +75,27 @@ exports.getActiveQuizzes = async (req, res) => {
     res.status(500).json({ message: "Error getting active quizzes" });
   }
 };
+
+// Actualizar un quiz existente
+exports.updateQuiz = async (req, res) => {
+  try {
+    const quizId = req.params.id;
+    const { title, description, isOpen, isLive, isActive, questions } =
+      req.body;
+
+    const updatedQuiz = await quizService.updateQuiz({
+      quizId,
+      title,
+      description,
+      isOpen,
+      isLive,
+      isActive,
+      questions,
+    });
+
+    res.status(200).json({ message: "Quiz updated", quiz: updatedQuiz });
+  } catch (error) {
+    console.error("Error updating quiz:", error);
+    res.status(500).json({ message: "Error updating quiz" });
+  }
+};

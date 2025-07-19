@@ -5,6 +5,7 @@ const {
   getAllQuizzes,
   getQuizById,
   getActiveQuizzes,
+  updateQuiz,
 } = require("../controllers/quiz.controller");
 const { protect } = require("../middlewares/auth.middleware");
 
@@ -19,5 +20,7 @@ router.get("/:id", getQuizById);
 
 // Crear un nuevo quiz (protegida → solo usuario autenticado puede crear)
 router.post("/", protect, createQuiz);
+
+router.put("/:id", protect, updateQuiz);
 
 module.exports = router;
