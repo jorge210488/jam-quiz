@@ -7,11 +7,9 @@ exports.createGameSession = async (req, res) => {
       quiz,
       players,
     });
-
-    res.status(201).json({ message: "GameSession created", session });
+    res.status(201).json(session);
   } catch (error) {
-    console.error("Error creating GameSession:", error);
-    res.status(500).json({ message: "Error creating GameSession" });
+    res.status(500).json({ message: "Error creating game session" });
   }
 };
 
@@ -72,5 +70,18 @@ exports.finishGameSession = async (req, res) => {
   } catch (error) {
     console.error("Error finishing session:", error);
     res.status(500).json({ message: "Error finishing session" });
+  }
+};
+
+exports.joinSession = async (req, res) => {
+  try {
+    const sessionId = req.params.id;
+    const { userId } = req.body;
+
+    const session = await gameSessionService.joinGameSession(sessionId, userId);
+    res.status(200).json({ message: "User joined", session });
+  } catch (error) {
+    console.error("Error joining session:", error);
+    res.status(500).json({ message: "Error joining session" });
   }
 };

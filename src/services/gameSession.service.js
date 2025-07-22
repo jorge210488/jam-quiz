@@ -1,11 +1,11 @@
 const GameSession = require("../models/GameSession");
 
-exports.createGameSession = async ({ quiz, players }) => {
+exports.createGameSession = async ({ quiz, players = [] }) => {
   const newSession = new GameSession({
     quiz,
     players,
-    startTime: new Date(),
-    status: "started",
+    startTime: players.length > 0 ? new Date() : null,
+    status: players.length > 0 ? "started" : "waiting",
     individualScores: players.map((playerId) => ({
       user: playerId,
       score: 0,
@@ -77,6 +77,28 @@ exports.finishGameSession = async (sessionId) => {
 
   session.status = "finished";
   session.endTime = new Date();
+
+  await session.save();
+  return session;
+};
+
+exports.joinGameSession = async (sessionId, userId) => {
+  const session = await GameSession.findById(sessionId);
+  if (!session) throw new Error("Session not found");
+
+  // Verifica si el usuario ya está en la sesión
+  if (session.players.includes(userId)) {
+    throw new Error("User already joined this session");
+  }
+
+  session.players.push(userId);
+  session.individualScores.push({ user: userId, score: 0 });
+
+  // Si deseas iniciar el juego automáticamente al tener X jugadores:
+  if (session.players.length >= 2 && session.status === "waiting") {
+    session.status = "started";
+    session.startTime = new Date();
+  }
 
   await session.save();
   return session;
