@@ -75,7 +75,7 @@ exports.finishGameSession = async (req, res) => {
 
 exports.joinSession = async (req, res) => {
   try {
-    const sessionId = req.params.id;
+    const sessionId = req.params.sessionId;
     const { userId } = req.body;
 
     const session = await gameSessionService.joinGameSession(sessionId, userId);

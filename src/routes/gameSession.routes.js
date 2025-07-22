@@ -21,6 +21,6 @@ router.get("/", protect, gameSessionController.getSessionsByUser);
 router.put("/:id/finish", protect, gameSessionController.finishGameSession);
 
 //Unirse usuarios
-router.post("/:sessionId/join", gameSessionController.joinGameSession);
+router.post("/:sessionId/join", gameSessionController.joinSession);
 
 module.exports = router;
