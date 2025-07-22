@@ -20,4 +20,7 @@ router.get("/", protect, gameSessionController.getSessionsByUser);
 // terminar la gameSession
 router.put("/:id/finish", protect, gameSessionController.finishGameSession);
 
+//Unirse usuarios
+router.post("/:sessionId/join", gameSessionController.joinGameSession);
+
 module.exports = router;
