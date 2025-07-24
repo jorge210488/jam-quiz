@@ -71,6 +71,16 @@ exports.getGameSessionsByUser = async (userId) => {
   return result;
 };
 
+exports.getGameSessionsByQuizId = async (quizId) => {
+  const sessions = await GameSession.find({ quiz: quizId })
+    .populate("players", "name email")
+    .populate("quiz", "title")
+    .populate("responses.user", "name")
+    .populate("responses.question", "text");
+
+  return sessions;
+};
+
 exports.finishGameSession = async (sessionId) => {
   const session = await GameSession.findById(sessionId);
   if (!session) throw new Error("Session not found");
@@ -102,4 +112,11 @@ exports.joinGameSession = async (sessionId, userId) => {
 
   await session.save();
   return session;
+};
+
+exports.deleteGameSession = async (sessionId) => {
+  const session = await GameSession.findById(sessionId);
+  if (!session) throw new Error("GameSession not found");
+
+  await GameSession.findByIdAndDelete(sessionId);
 };

@@ -61,6 +61,17 @@ exports.getSessionsByUser = async (req, res) => {
   }
 };
 
+exports.getSessionsByQuiz = async (req, res) => {
+  try {
+    const { quizId } = req.params;
+    const sessions = await gameSessionService.getGameSessionsByQuizId(quizId);
+    res.status(200).json(sessions);
+  } catch (error) {
+    console.error("Error getting sessions by quiz:", error);
+    res.status(500).json({ message: "Error getting sessions by quiz" });
+  }
+};
+
 exports.finishGameSession = async (req, res) => {
   try {
     const sessionId = req.params.id;
@@ -83,5 +94,16 @@ exports.joinSession = async (req, res) => {
   } catch (error) {
     console.error("Error joining session:", error);
     res.status(500).json({ message: "Error joining session" });
+  }
+};
+
+exports.deleteGameSession = async (req, res) => {
+  try {
+    const sessionId = req.params.id;
+    await gameSessionService.deleteGameSession(sessionId);
+    res.status(200).json({ message: "GameSession deleted" });
+  } catch (error) {
+    console.error("Error deleting session:", error);
+    res.status(500).json({ message: "Error deleting session" });
   }
 };
