@@ -10,7 +10,7 @@ router.post("/", protect, gameSessionController.createGameSession);
 
 // Agregar respuesta → token obligatorio
 router.post("/:id/responses", protect, gameSessionController.addResponse);
-cd;
+
 // Ver una GameSession específica por ID → token obligatorio
 router.get("/:id", protect, gameSessionController.getGameSessionById);
 

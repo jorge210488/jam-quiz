@@ -13,6 +13,25 @@ const defaultBadges = [
     iconUrl: "/badges/perfect.png",
     condition: "perfect_score",
   },
+  // NUEVAS INSIGNIAS
+  {
+    name: "Jugador activo",
+    description: "Has completado 10 quizzes",
+    iconUrl: "/badges/active_player.png",
+    condition: "ten_quizzes",
+  },
+  {
+    name: "Colaborador",
+    description: "Enviaste tu primer feedback",
+    iconUrl: "/badges/feedback.png",
+    condition: "first_feedback",
+  },
+  {
+    name: "Puntaje brillante",
+    description: "Obtuviste 100% en un quiz",
+    iconUrl: "/badges/brilliant_score.png",
+    condition: "perfect_score", // puedes usar el mismo condition si aplica para ambas
+  },
 ];
 
 const preloadBadges = async () => {
