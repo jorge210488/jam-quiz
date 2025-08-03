@@ -24,7 +24,13 @@ exports.loginUser = async ({ email, password }) => {
 
   const token = createToken(user);
   return {
-    user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      badges: user.badges,
+    },
     token,
   };
 };

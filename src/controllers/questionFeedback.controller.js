@@ -29,3 +29,15 @@ exports.getAllFeedbacks = async (req, res) => {
     res.status(500).json({ message: "Error obteniendo feedbacks" });
   }
 };
+
+exports.getUserFeedbacks = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const feedbacks = await questionFeedbackService.getFeedbacksByUser(userId);
+
+    res.status(200).json(feedbacks);
+  } catch (error) {
+    console.error("Error obteniendo feedbacks del usuario:", error);
+    res.status(500).json({ message: "Error obteniendo feedbacks del usuario" });
+  }
+};

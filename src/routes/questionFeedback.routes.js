@@ -14,4 +14,11 @@ router.get(
   questionFeedbackController.getAllFeedbacks
 );
 
+// Obtener feedbacks del usuario logueado
+router.get(
+  "/my-feedbacks",
+  protect,
+  questionFeedbackController.getUserFeedbacks
+);
+
 module.exports = router;
