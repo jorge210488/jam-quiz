@@ -16,4 +16,7 @@ router.put("/:id", protect, userController.updateUser);
 // Cualquier user autenticado puede eliminar
 router.delete("/:id", protect, userController.deleteUser);
 
+// Asignar un badge a un usuario (admin o lógica controlada)
+router.post("/:id/badges", protect, userController.assignBadgeToUser);
+
 module.exports = router;

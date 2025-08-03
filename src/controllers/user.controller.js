@@ -52,3 +52,20 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.assignBadgeToUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { badgeId } = req.body;
+
+    const updatedUser = await userService.assignBadgeToUser(userId, badgeId);
+
+    res.status(200).json({
+      message: "Badge assigned",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error assigning badge:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
